@@ -2,6 +2,9 @@
 
 A new Flutter project.
 
+## Create branches
+Create branches with the ClickUp task id so the tasks are linked to the branches.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
