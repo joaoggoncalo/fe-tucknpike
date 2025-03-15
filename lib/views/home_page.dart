@@ -1,6 +1,6 @@
 import 'package:fe_tucknpike/services/auth_service.dart';
-import 'package:fe_tucknpike/views/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// Home page displayed after a successful login.
 class HomePage extends StatefulWidget {
@@ -19,12 +19,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _logout() async {
     await _authService.logout();
     if (!mounted) return;
-    await Navigator.pushReplacement<void, void>(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => const LoginPage(),
-      ),
-    );
+    context.go('/login');
   }
 
   @override

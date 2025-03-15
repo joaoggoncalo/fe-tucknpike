@@ -1,19 +1,25 @@
 import 'dart:convert';
-
 import 'package:fe_tucknpike/config.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
-/// AuthService class handles authentication-related operations
-/// such as login, registration,
-/// token retrieval, and logout.
+/// AuthService class handles authentication-related operations.
 class AuthService {
+  /// Singleton instance of the [AuthService] class.
+  factory AuthService() => _instance;
+  AuthService._internal();
+  static final AuthService _instance = AuthService._internal();
+
   /// Base URL for the authentication API, retrieved from AppConfig.
   final String baseUrl = AppConfig.baseUrl;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  /// Login method to authenticate a user with username or email and password.
-  /// Returns a JWT token if successful.
+  String? _cachedToken;
+
+  /// Returns true if a token exists in memory.
+  bool get isLoggedIn => _cachedToken != null;
+
+  /// Login method to authenticate a user with username/email and password.
   Future<String?> login(String usernameOrEmail, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/login'),
@@ -29,6 +35,7 @@ class AuthService {
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final token = data['token'] as String;
+      _cachedToken = token;
       await _storage.write(key: 'jwt_token', value: token);
       return token;
     } else {
@@ -37,7 +44,6 @@ class AuthService {
   }
 
   /// Register method to create a new user account.
-  /// Throws an exception if registration fails.
   Future<void> register({
     required String username,
     required String email,
@@ -75,6 +81,7 @@ class AuthService {
 
   /// Logout method to delete the JWT token from secure storage.
   Future<void> logout() async {
+    _cachedToken = null;
     await _storage.delete(key: 'jwt_token');
   }
 }
