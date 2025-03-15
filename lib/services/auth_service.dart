@@ -43,7 +43,8 @@ class AuthService {
     }
   }
 
-  /// Register method to create a new user account.
+  /// Register method to create a new user account
+  /// and add a role-specific record.
   Future<void> register({
     required String username,
     required String email,
@@ -53,6 +54,7 @@ class AuthService {
     required String clubName,
     required String role,
   }) async {
+    // First, register the user through the auth endpoint.
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: <String, String>{
@@ -71,6 +73,46 @@ class AuthService {
 
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception('Registration failed: ${response.body}');
+    }
+
+    // Parse the newly created user data.
+    final newUser = jsonDecode(response.body) as Map<String, dynamic>;
+    final newUserId = newUser['id'] as String;
+
+    // If the role is "gymnast", post to the gymnasts endpoint.
+    if (role.toLowerCase() == 'gymnast') {
+      final gymnastResponse = await http.post(
+        Uri.parse('$baseUrl/gymnasts'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'userId': newUserId,
+          'trainingIds': <String>[],
+        }),
+      );
+      if (gymnastResponse.statusCode != 201 &&
+          gymnastResponse.statusCode != 200) {
+        throw Exception(
+          'Failed to create gymnast record: ${gymnastResponse.body}',
+        );
+      }
+    }
+    // If the role is "coach", post to the coaches endpoint.
+    else if (role.toLowerCase() == 'coach') {
+      final coachResponse = await http.post(
+        Uri.parse('$baseUrl/coaches'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'userId': newUserId,
+          'gymnasts': <String>[],
+        }),
+      );
+      if (coachResponse.statusCode != 201 && coachResponse.statusCode != 200) {
+        throw Exception('Failed to create coach record: ${coachResponse.body}');
+      }
     }
   }
 
