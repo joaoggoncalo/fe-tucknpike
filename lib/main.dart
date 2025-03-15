@@ -1,15 +1,16 @@
-import 'package:fe_tucknpike/views/my_home_page.dart';
+import 'package:fe_tucknpike/views/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// The main entry point of the application.
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   runApp(const MyApp());
 }
 
-/// The root widget of the application.
+/// The main application widget.
 class MyApp extends StatelessWidget {
-  /// Creates a [MyApp] widget.
+  /// Creates the main application widget.
   const MyApp({super.key});
 
   @override
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
+      home: const LoginPage(),
     );
   }
 }
