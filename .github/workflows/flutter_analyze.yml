@@ -2,8 +2,7 @@ name: Flutter Analyze
 
 on:
   pull_request:
-    branches: [ develop, main ]
-
+    branches: [develop, main]
 jobs:
   analyze:
     runs-on: ubuntu-latest
