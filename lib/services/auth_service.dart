@@ -42,7 +42,8 @@ class AuthService {
     }
   }
 
-  /// Register method to create a new user account and add a role-specific record.
+  /// Register method to create a new user account
+  /// and add a role-specific record.
   Future<void> register({
     required String username,
     required String email,
@@ -88,7 +89,8 @@ class AuthService {
       if (gymnastResponse.statusCode != 201 &&
           gymnastResponse.statusCode != 200) {
         throw Exception(
-            'Failed to create gymnast record: ${gymnastResponse.body}');
+          'Failed to create gymnast record: ${gymnastResponse.body}',
+        );
       }
     } else if (role.toLowerCase() == 'coach') {
       final coachResponse = await _apiClient.request(

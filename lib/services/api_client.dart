@@ -10,6 +10,7 @@ class ApiClient {
   /// apiKey for the API.
   final String apiKey = dotenv.env['API_KEY']!;
 
+  /// Sends an HTTP request to the API.
   Future<http.Response> request({
     required String endpoint,
     required String method,
