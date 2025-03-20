@@ -1,35 +1,34 @@
 import 'dart:convert';
-import 'package:fe_tucknpike/config.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 
-/// AuthService class handles authentication-related operations.
+import 'package:fe_tucknpike/config.dart';
+import 'package:fe_tucknpike/services/api_client.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+/// AuthService handles authentication-related operations.
 class AuthService {
-  /// Singleton instance of the [AuthService] class.
+  /// Singleton constructor.
   factory AuthService() => _instance;
   AuthService._internal();
   static final AuthService _instance = AuthService._internal();
 
-  /// Base URL for the authentication API, retrieved from AppConfig.
+  /// baseUrl for the API.
   final String baseUrl = AppConfig.baseUrl;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-
+  final ApiClient _apiClient = ApiClient();
   String? _cachedToken;
 
   /// Returns true if a token exists in memory.
   bool get isLoggedIn => _cachedToken != null;
 
-  /// Login method to authenticate a user with username/email and password.
+  /// Login method to authenticate a user.
   Future<String?> login(String usernameOrEmail, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+    final response = await _apiClient.request(
+      endpoint: 'auth/login',
+      method: 'POST',
+      body: {
         'usernameOrEmail': usernameOrEmail,
         'password': password,
-      }),
+      },
     );
 
     if (response.statusCode == 201) {
@@ -43,8 +42,7 @@ class AuthService {
     }
   }
 
-  /// Register method to create a new user account
-  /// and add a role-specific record.
+  /// Register method to create a new user account and add a role-specific record.
   Future<void> register({
     required String username,
     required String email,
@@ -55,12 +53,10 @@ class AuthService {
     required String role,
   }) async {
     // First, register the user through the auth endpoint.
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+    final response = await _apiClient.request(
+      endpoint: 'auth/register',
+      method: 'POST',
+      body: {
         'username': username,
         'email': email,
         'password': password,
@@ -68,7 +64,7 @@ class AuthService {
         'dateOfBirth': dateOfBirth,
         'clubName': clubName,
         'role': role,
-      }),
+      },
     );
 
     if (response.statusCode != 201 && response.statusCode != 200) {
@@ -79,36 +75,29 @@ class AuthService {
     final newUser = jsonDecode(response.body) as Map<String, dynamic>;
     final newUserId = newUser['id'] as String;
 
-    // If the role is "gymnast", post to the gymnasts endpoint.
+    // Create a role-specific record using the API client.
     if (role.toLowerCase() == 'gymnast') {
-      final gymnastResponse = await http.post(
-        Uri.parse('$baseUrl/gymnasts'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final gymnastResponse = await _apiClient.request(
+        endpoint: 'gymnasts',
+        method: 'POST',
+        body: {
           'userId': newUserId,
           'trainingIds': <String>[],
-        }),
+        },
       );
       if (gymnastResponse.statusCode != 201 &&
           gymnastResponse.statusCode != 200) {
         throw Exception(
-          'Failed to create gymnast record: ${gymnastResponse.body}',
-        );
+            'Failed to create gymnast record: ${gymnastResponse.body}');
       }
-    }
-    // If the role is "coach", post to the coaches endpoint.
-    else if (role.toLowerCase() == 'coach') {
-      final coachResponse = await http.post(
-        Uri.parse('$baseUrl/coaches'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+    } else if (role.toLowerCase() == 'coach') {
+      final coachResponse = await _apiClient.request(
+        endpoint: 'coaches',
+        method: 'POST',
+        body: {
           'userId': newUserId,
           'gymnasts': <String>[],
-        }),
+        },
       );
       if (coachResponse.statusCode != 201 && coachResponse.statusCode != 200) {
         throw Exception('Failed to create coach record: ${coachResponse.body}');
@@ -116,12 +105,12 @@ class AuthService {
     }
   }
 
-  /// Retrieve JWT token from secure storage.
+  /// Retrieves the JWT token from secure storage.
   Future<String?> getToken() async {
     return _storage.read(key: 'jwt_token');
   }
 
-  /// Logout method to delete the JWT token from secure storage.
+  /// Logout method to delete the JWT token.
   Future<void> logout() async {
     _cachedToken = null;
     await _storage.delete(key: 'jwt_token');
