@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
           _passwordController.text,
         );
         if (!mounted) return;
-        context.go('/home');
+        context.go('/');
       } on Exception catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

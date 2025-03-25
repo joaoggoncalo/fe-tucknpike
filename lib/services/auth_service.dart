@@ -17,6 +17,11 @@ class AuthService {
   final ApiClient _apiClient = ApiClient();
   String? _cachedToken;
 
+  /// Call this during app initialization to load the token from storage.
+  Future<void> init() async {
+    _cachedToken = await _storage.read(key: 'jwt_token');
+  }
+
   /// Returns true if a token exists in memory.
   bool get isLoggedIn => _cachedToken != null;
 
@@ -42,8 +47,8 @@ class AuthService {
     }
   }
 
-  /// Register method to create a new user account
-  /// and add a role-specific record.
+  /// Register method to create a new user account and
+  /// add a role-specific record.
   Future<void> register({
     required String username,
     required String email,
