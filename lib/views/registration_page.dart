@@ -44,7 +44,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
         );
         context.go('/login');
       } on Exception catch (e) {
-        print('e $e');
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Registration failed: $e')),
