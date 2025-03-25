@@ -69,7 +69,7 @@ class AuthService {
     );
 
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw Exception('Registration failed: ${response.body}');
+      throw Exception({response.body});
     }
 
     // Parse the newly created user data.
