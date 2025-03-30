@@ -1,25 +1,29 @@
 import 'dart:convert';
+
+import 'package:fe_tucknpike/services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-/// ApiClient class handles HTTP requests to the API.
+/// ApiClient now uses the JWT token (if available) for secured endpoints.
 class ApiClient {
-  /// baseUrl for the API.
-  final String baseUrl = dotenv.env['BASE_URL']!;
+  /// The base URL for the API.
+  final String baseUrl =
+      kIsWeb ? dotenv.env['WEB_URL']! : dotenv.env['BASE_URL']!;
 
-  /// apiKey for the API.
-  final String apiKey = dotenv.env['API_KEY']!;
-
-  /// Sends an HTTP request to the API.
+  /// Make an HTTP request to the API.
   Future<http.Response> request({
     required String endpoint,
     required String method,
     Map<String, dynamic>? body,
   }) async {
     final url = Uri.parse('$baseUrl/$endpoint');
+
+    final token = await AuthService().getToken();
+
     final headers = <String, String>{
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
+      if (token != null) 'Authorization': 'Bearer $token',
     };
 
     switch (method.toUpperCase()) {
