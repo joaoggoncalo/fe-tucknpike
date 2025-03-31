@@ -38,8 +38,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
         );
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration successful! Please log in.'),
+          SnackBar(
+            content: Text(
+              'Registration successful! Welcome ${_usernameController.text}!',
+            ),
           ),
         );
         context.go('/login');

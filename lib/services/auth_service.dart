@@ -81,6 +81,8 @@ class AuthService {
     final newUser = jsonDecode(response.body) as Map<String, dynamic>;
     final newUserId = newUser['id'] as String;
 
+    await login(username, password);
+
     // Create a role-specific record using the API client.
     if (role.toLowerCase() == 'gymnast') {
       final gymnastResponse = await _apiClient.request(
