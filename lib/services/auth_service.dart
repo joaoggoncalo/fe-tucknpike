@@ -91,6 +91,7 @@ class AuthService {
         body: {
           'userId': newUserId,
           'trainingIds': <String>[],
+          'username': username,
         },
       );
       if (gymnastResponse.statusCode != 201 &&
@@ -106,6 +107,7 @@ class AuthService {
         body: {
           'userId': newUserId,
           'gymnasts': <String>[],
+          'username': username,
         },
       );
       if (coachResponse.statusCode != 201 && coachResponse.statusCode != 200) {
