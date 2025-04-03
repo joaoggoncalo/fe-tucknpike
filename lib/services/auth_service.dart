@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fe_tucknpike/config.dart';
 import 'package:fe_tucknpike/services/api_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 /// AuthService handles authentication-related operations.
 class AuthService {
@@ -24,6 +25,13 @@ class AuthService {
 
   /// Returns true if a token exists in memory.
   bool get isLoggedIn => _cachedToken != null;
+
+  /// Returns the user role extracted from the decoded token.
+  String? get userRole {
+    if (_cachedToken == null) return null;
+    final decodedToken = JwtDecoder.decode(_cachedToken!);
+    return decodedToken['role'] as String?;
+  }
 
   /// Login method to authenticate a user.
   Future<String?> login(String usernameOrEmail, String password) async {
@@ -58,7 +66,6 @@ class AuthService {
     required String clubName,
     required String role,
   }) async {
-    // First, register the user through the auth endpoint.
     final response = await _apiClient.request(
       endpoint: 'auth/register',
       method: 'POST',
@@ -77,13 +84,11 @@ class AuthService {
       throw Exception({response.body});
     }
 
-    // Parse the newly created user data.
     final newUser = jsonDecode(response.body) as Map<String, dynamic>;
     final newUserId = newUser['id'] as String;
 
     await login(username, password);
 
-    // Create a role-specific record using the API client.
     if (role.toLowerCase() == 'gymnast') {
       final gymnastResponse = await _apiClient.request(
         endpoint: 'gymnasts',
