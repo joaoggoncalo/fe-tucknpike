@@ -1,14 +1,16 @@
+// File: lib/views/role_based_shell.dart
 import 'dart:convert';
+import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// A shell that displays different navigation items based on the user's role.
+/// A shell widget that provides a bottom navigation bar and an app bar
 class RoleBasedShell extends StatefulWidget {
-  /// Creates the role-based shell.
+  /// Creates a [RoleBasedShell] widget.
   const RoleBasedShell({required this.child, super.key});
 
-  /// Creates a role-based shell.
+  /// The child widget to be displayed in the shell.
   final Widget child;
 
   @override
@@ -51,7 +53,6 @@ class _RoleBasedShellState extends State<RoleBasedShell> {
 
   List<BottomNavigationBarItem> _navItems() {
     if (_role == null) {
-      // Return two dummy items until role is loaded.
       return [
         const BottomNavigationBarItem(
           icon: Icon(Icons.hourglass_empty),
@@ -87,7 +88,6 @@ class _RoleBasedShellState extends State<RoleBasedShell> {
         ),
       ];
     }
-    // Fallback for unexpected role with two dummy items.
     return [
       const BottomNavigationBarItem(
         icon: Icon(Icons.home),
@@ -129,13 +129,30 @@ class _RoleBasedShellState extends State<RoleBasedShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tucknpike'),
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [BrandColors.primaryColor, BrandColors.accentColor],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: const Text(
+          'Tucknpike',
+          style: TextStyle(
+            color: BrandColors.backgroundColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: BrandColors.backgroundColor),
             onPressed: _logout,
           ),
         ],
+        centerTitle: true,
       ),
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(

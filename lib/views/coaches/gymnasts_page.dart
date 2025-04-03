@@ -1,9 +1,11 @@
+// File: lib/views/coaches/gymnasts_page.dart
+import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/services/coach_service.dart';
 import 'package:flutter/material.dart';
 
-/// The page that displays the gymnasts for a coach and allows adding gymnasts.
+/// A page that displays a list of gymnasts connected to the coach
 class GymnastsPage extends StatefulWidget {
-  /// GymnastsPage constructor.
+  /// Creates a [GymnastsPage] widget.
   const GymnastsPage({super.key});
 
   @override
@@ -36,27 +38,38 @@ class _GymnastsPageState extends State<GymnastsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: BrandColors.backgroundColor,
+      // The shell already provides the app bar.
       body: FutureBuilder<Map<String, List<dynamic>>>(
         future: _dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: BrandColors.accentColor),
+            );
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: BrandColors.darkAccent),
+              ),
+            );
           } else if (!snapshot.hasData) {
-            return const Center(child: Text('No data available.'));
+            return const Center(
+              child: Text(
+                'No data available.',
+                style: TextStyle(color: BrandColors.darkAccent),
+              ),
+            );
           }
 
           final connected = snapshot.data!['connected']!;
           final all = snapshot.data!['all']!;
-
           final gymnastMap = {
             for (final gymnast in all.cast<Map<String, dynamic>>())
               gymnast['userId'].toString(): gymnast,
           };
-
           final connectedIds = connected.map((g) => g.toString()).toSet();
-
           final available = all
               .where(
                 (gymnast) => !connectedIds.contains(
@@ -65,87 +78,168 @@ class _GymnastsPageState extends State<GymnastsPage> {
               )
               .toList();
 
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Section: Connected gymnasts.
-                Padding(
-                  padding: const EdgeInsets.all(16),
+          return CustomScrollView(
+            slivers: [
+              // Connected Gymnasts Section
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
                   child: Text(
                     'Connected Gymnasts',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: BrandColors.primaryColor,
+                    ),
                   ),
                 ),
-                if (connected.isEmpty)
-                  const Center(
+              ),
+              if (connected.isEmpty)
+                const SliverToBoxAdapter(
+                  child: Center(
                     child: Padding(
                       padding: EdgeInsets.all(8),
-                      child: Text('No connected gymnasts.'),
+                      child: Text(
+                        'No connected gymnasts.',
+                        style: TextStyle(color: BrandColors.darkAccent),
+                      ),
                     ),
-                  )
-                else
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: connected.length,
-                    itemBuilder: (context, index) {
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
                       final gymnastId = connected[index].toString();
                       final gymnastData = gymnastMap[gymnastId];
-                      String title;
-                      String? subtitle;
-                      if (gymnastData != null) {
-                        title = gymnastData['username'].toString();
-                        subtitle = 'ID: ${gymnastData['userId']}';
-                      } else {
-                        title = gymnastId;
-                        subtitle = null;
-                      }
+                      final title = gymnastData != null
+                          ? gymnastData['username'].toString()
+                          : gymnastId;
+                      final subtitle = gymnastData != null
+                          ? 'ID: ${gymnastData['userId']}'
+                          : null;
                       return Card(
-                        margin: const EdgeInsets.all(8),
+                        color: BrandColors.cardColor,
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
                         child: ListTile(
-                          title: Text(title),
-                          subtitle: subtitle != null ? Text(subtitle) : null,
+                          leading: const Icon(
+                            Icons.person,
+                            color: BrandColors.accentColor,
+                            size: 32,
+                          ),
+                          title: Text(
+                            title,
+                            style: const TextStyle(
+                              color: BrandColors.primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: subtitle != null
+                              ? Text(
+                                  subtitle,
+                                  style: const TextStyle(
+                                    color: BrandColors.darkAccent,
+                                  ),
+                                )
+                              : null,
                         ),
                       );
                     },
-                  ),
-                // Section: Available gymnasts.
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Available Gymnasts',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    childCount: connected.length,
                   ),
                 ),
-                if (available.isEmpty)
-                  const Center(
+              // Available Gymnasts Section
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+                  child: Text(
+                    'Available Gymnasts',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: BrandColors.primaryColor,
+                    ),
+                  ),
+                ),
+              ),
+              if (available.isEmpty)
+                const SliverToBoxAdapter(
+                  child: Center(
                     child: Padding(
                       padding: EdgeInsets.all(8),
-                      child: Text('No available gymnasts to add.'),
+                      child: Text(
+                        'No available gymnasts to add.',
+                        style: TextStyle(color: BrandColors.darkAccent),
+                      ),
                     ),
-                  )
-                else
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: available.length,
-                    itemBuilder: (context, index) {
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
                       final gymnast = available[index] as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(gymnast['username'].toString()),
-                        subtitle: Text('ID: ${gymnast['userId']}'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () async {
-                            await _addGymnast(gymnast['userId'].toString());
-                          },
+                      return Card(
+                        color: BrandColors.cardColor,
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.add_circle_outline,
+                            color: BrandColors.accentColor,
+                            size: 32,
+                          ),
+                          title: Text(
+                            gymnast['username'].toString(),
+                            style: const TextStyle(
+                              color: BrandColors.primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'ID: ${gymnast['userId']}',
+                            style:
+                                const TextStyle(color: BrandColors.darkAccent),
+                          ),
+                          trailing: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: BrandColors.accentColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () async {
+                              await _addGymnast(gymnast['userId'].toString());
+                            },
+                            child: const Text(
+                              'Add',
+                              style:
+                                  TextStyle(color: BrandColors.backgroundColor),
+                            ),
+                          ),
                         ),
                       );
                     },
+                    childCount: available.length,
                   ),
-              ],
-            ),
+                ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 16),
+              ),
+            ],
           );
         },
       ),

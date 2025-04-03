@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:fe_tucknpike/services/api_client.dart';
 import 'package:fe_tucknpike/stores/auth_storage.dart';
 
@@ -51,6 +52,23 @@ class CoachService {
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to add gymnast ${response.body}');
+    }
+  }
+
+  /// Remove a gymnast from the coach.
+  Future<List<Training>> getAthletesTrainings() async {
+    final response = await _apiClient.request(
+      endpoint: 'trainings/my-athletes-trainings',
+      method: 'GET',
+    );
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List<dynamic>;
+      final trainings = jsonList
+          .map((item) => Training.fromJson(item as Map<String, dynamic>))
+          .toList();
+      return trainings;
+    } else {
+      return [];
     }
   }
 }

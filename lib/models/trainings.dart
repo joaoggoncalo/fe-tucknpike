@@ -1,3 +1,4 @@
+// File: lib/models/trainings.dart
 import 'package:fe_tucknpike/models/exercise.dart';
 
 /// This class represents a training session.
@@ -11,6 +12,7 @@ class Training {
     required this.location,
     required this.status,
     this.coachId,
+    this.gymnastUsername, // Optional added field for coach endpoint
   });
 
   /// Creates a [Training] object from a JSON map.
@@ -34,6 +36,7 @@ class Training {
       date: DateTime.parse(json['date'] as String),
       location: json['location'] as Map<String, dynamic>,
       status: json['status'] as String,
+      gymnastUsername: json['gymnastUsername'] as String?, // new field
     );
   }
 
@@ -49,7 +52,7 @@ class Training {
   /// The list of exercises in the training session.
   final List<Exercise> exercises;
 
-  /// The date of the training session
+  /// The date of the training session.
   final DateTime date;
 
   /// The location of the training session.
@@ -57,4 +60,7 @@ class Training {
 
   /// The status of the training session.
   final String status;
+
+  /// Optional gymnast username when provided by the coach endpoint.
+  final String? gymnastUsername;
 }

@@ -1,5 +1,5 @@
-// File: lib/views/gymnasts/trainings_page.dart
 import 'package:fe_tucknpike/components/trainings_list.dart';
+import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:fe_tucknpike/services/gymnast_service.dart';
 import 'package:fe_tucknpike/stores/auth_storage.dart';
@@ -59,21 +59,28 @@ class TrainingsPageState extends State<TrainingsPage> {
 
   void _goToPreviousMonth() {
     setState(() {
-      _displayedMonth =
-          DateTime(_displayedMonth.year, _displayedMonth.month - 1);
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month - 1,
+      );
     });
   }
 
   void _goToNextMonth() {
     setState(() {
-      _displayedMonth =
-          DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month + 1,
+      );
     });
   }
 
   List<Widget> _buildCalendarDays() {
-    final daysInMonth =
-        DateTime(_displayedMonth.year, _displayedMonth.month + 1, 0).day;
+    final daysInMonth = DateTime(
+      _displayedMonth.year,
+      _displayedMonth.month + 1,
+      0,
+    ).day;
     return List.generate(daysInMonth, (index) {
       final day = index + 1;
       final status = _getTrainingStatusForDay(day);
@@ -82,17 +89,17 @@ class TrainingsPageState extends State<TrainingsPage> {
       var circleColor = Colors.transparent;
 
       if (status == 'scheduled') {
-        borderColor = Colors.blue;
+        borderColor = BrandColors.accentColor;
         circlesCount = 1;
-        circleColor = Colors.blue;
+        circleColor = BrandColors.accentColor;
       } else if (status == 'completed') {
-        borderColor = Colors.green;
+        borderColor = BrandColors.primaryColor;
         circlesCount = 3;
-        circleColor = Colors.green;
+        circleColor = BrandColors.primaryColor;
       } else if (status == 'missed') {
-        borderColor = Colors.red;
+        borderColor = BrandColors.errorColor;
         circlesCount = 2;
-        circleColor = Colors.red;
+        circleColor = BrandColors.errorColor;
       }
       final borderWidth = status.isNotEmpty ? 4.0 : 1.0;
 
@@ -118,12 +125,18 @@ class TrainingsPageState extends State<TrainingsPage> {
         margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: borderColor, width: borderWidth),
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$day'),
+            Text(
+              '$day',
+              style: const TextStyle(color: BrandColors.darkAccent),
+            ),
             const SizedBox(height: 4),
             buildStatusCircles(),
           ],
@@ -136,6 +149,7 @@ class TrainingsPageState extends State<TrainingsPage> {
   Widget build(BuildContext context) {
     final monthStr = DateFormat('MMMM yyyy').format(_displayedMonth);
     return Scaffold(
+      backgroundColor: BrandColors.backgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -144,16 +158,31 @@ class TrainingsPageState extends State<TrainingsPage> {
               children: [
                 IconButton(
                   onPressed: _goToPreviousMonth,
-                  icon: const Text('<', style: TextStyle(fontSize: 20)),
+                  icon: const Icon(
+                    Icons.chevron_left,
+                    size: 28,
+                    color: BrandColors.accentColor,
+                  ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text(monthStr, style: const TextStyle(fontSize: 20)),
+                    child: Text(
+                      monthStr,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: BrandColors.primaryColor,
+                      ),
+                    ),
                   ),
                 ),
                 IconButton(
                   onPressed: _goToNextMonth,
-                  icon: const Text('>', style: TextStyle(fontSize: 20)),
+                  icon: const Icon(
+                    Icons.chevron_right,
+                    size: 28,
+                    color: BrandColors.accentColor,
+                  ),
                 ),
               ],
             ),
