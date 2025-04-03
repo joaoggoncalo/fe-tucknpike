@@ -12,28 +12,35 @@ class AuthService {
   AuthService._internal();
   static final AuthService _instance = AuthService._internal();
 
-  /// baseUrl for the API.
+  /// Base URL for the API.
   final String baseUrl = AppConfig.baseUrl;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final ApiClient _apiClient = ApiClient();
   String? _cachedToken;
 
-  /// Call this during app initialization to load the token from storage.
+  /// Initializes the AuthService by reading the token from secure storage.
   Future<void> init() async {
     _cachedToken = await _storage.read(key: 'jwt_token');
   }
 
-  /// Returns true if a token exists in memory.
+  /// Checks if the user is logged in.
   bool get isLoggedIn => _cachedToken != null;
 
-  /// Returns the user role extracted from the decoded token.
+  /// Checks if the token is expired.
   String? get userRole {
     if (_cachedToken == null) return null;
     final decodedToken = JwtDecoder.decode(_cachedToken!);
     return decodedToken['role'] as String?;
   }
 
-  /// Login method to authenticate a user.
+  /// Checks if the token is expired.
+  String? get username {
+    if (_cachedToken == null) return null;
+    final decodedToken = JwtDecoder.decode(_cachedToken!);
+    return decodedToken['username'] as String?;
+  }
+
+  /// Logs in a user with the provided username or email and password.
   Future<String?> login(String usernameOrEmail, String password) async {
     final response = await _apiClient.request(
       endpoint: 'auth/login',
@@ -55,8 +62,7 @@ class AuthService {
     }
   }
 
-  /// Register method to create a new user account and
-  /// add a role-specific record.
+  /// Registers a new user and creates a gymnast or coach record.
   Future<void> register({
     required String username,
     required String email,
@@ -121,12 +127,12 @@ class AuthService {
     }
   }
 
-  /// Retrieves the JWT token from secure storage.
+  /// Fetches the user ID from the token.
   Future<String?> getToken() async {
     return _storage.read(key: 'jwt_token');
   }
 
-  /// Logout method to delete the JWT token.
+  /// Fetches the user ID from the token.
   Future<void> logout() async {
     _cachedToken = null;
     await _storage.delete(key: 'jwt_token');
