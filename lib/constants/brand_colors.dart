@@ -19,4 +19,7 @@ class BrandColors {
 
   /// Dark blue color.
   static const darkAccent = Color(0xFF002338);
+
+  /// Error color.
+  static const errorColor = Color(0xFFEF233C);
 }
