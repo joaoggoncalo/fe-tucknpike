@@ -1,4 +1,4 @@
-// File: lib/views/profile_page.dart
+// dart
 import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:fe_tucknpike/services/auth_service.dart';
@@ -21,6 +21,7 @@ class ProfilePage extends StatefulWidget {
 class ProfilePageState extends State<ProfilePage> {
   String _username = '';
   String _role = '';
+  String _seasonGoal = '';
   List<Training> _trainings = [];
   bool _loading = true;
 
@@ -39,10 +40,11 @@ class ProfilePageState extends State<ProfilePage> {
         _trainings = await CoachService().getAthletesTrainings();
       } else {
         _trainings = await GymnastService().getTrainings();
+        _seasonGoal = await GymnastService().getSeasonGoal();
       }
     } on Exception catch (e) {
       if (kDebugMode) {
-        print('Error loading profile trainings: $e');
+        print('Error loading profile trainings or season goal: $e');
       }
     }
     setState(() {
@@ -105,6 +107,19 @@ class ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
+                    if (_role == 'gymnast') ...[
+                      const SizedBox(height: 12),
+                      Center(
+                        child: Text(
+                          'Season Goal: $_seasonGoal',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: BrandColors.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 30),
                     const Text(
                       'Training Statistics',

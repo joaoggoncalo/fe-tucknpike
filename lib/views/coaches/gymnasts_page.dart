@@ -1,3 +1,4 @@
+// dart
 import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/services/coach_service.dart';
 import 'package:flutter/material.dart';
@@ -35,11 +36,60 @@ class _GymnastsPageState extends State<GymnastsPage> {
     });
   }
 
+  Future<void> _updateSeasonGoal(
+    String gymnastUserId,
+    String seasonGoal,
+  ) async {
+    await _coachService.updateSeasonGoal(gymnastUserId, seasonGoal);
+    setState(() {
+      _dataFuture = _loadData();
+    });
+  }
+
+  Future<void> _showEditSeasonGoalDialog(String gymnastId) async {
+    final controller = TextEditingController();
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Edit Season Goal'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Enter season goal',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final seasonGoal = controller.text;
+                Navigator.pop(dialogContext);
+                await _updateSeasonGoal(gymnastId, seasonGoal);
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Season goal updated successfully'),
+                  ),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: BrandColors.backgroundColor,
-      // The shell already provides the app bar.
       body: FutureBuilder<Map<String, List<dynamic>>>(
         future: _dataFuture,
         builder: (context, snapshot) {
@@ -80,7 +130,6 @@ class _GymnastsPageState extends State<GymnastsPage> {
 
           return CustomScrollView(
             slivers: [
-              // Connected Gymnasts Section
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -129,6 +178,7 @@ class _GymnastsPageState extends State<GymnastsPage> {
                         ),
                         elevation: 4,
                         child: ListTile(
+                          onTap: () => _showEditSeasonGoalDialog(gymnastId),
                           leading: const Icon(
                             Icons.person,
                             color: BrandColors.accentColor,
@@ -155,7 +205,6 @@ class _GymnastsPageState extends State<GymnastsPage> {
                     childCount: connected.length,
                   ),
                 ),
-              // Available Gymnasts Section
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -246,7 +295,6 @@ class _GymnastsPageState extends State<GymnastsPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: BrandColors.accentColor,
         onPressed: () {
-          // Navigate to the create training page.
           context.push('/create-training');
         },
         tooltip: 'Create Training',
