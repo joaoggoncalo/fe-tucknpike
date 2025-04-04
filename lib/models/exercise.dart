@@ -7,12 +7,11 @@ class Exercise {
   factory Exercise.fromJson(Map<String, dynamic> json) {
     return Exercise(
       name: json['name'] as String,
-      completed: json['completed'] as bool,
+      completed: json['completed'] as bool? ?? false,
     );
   }
 
-  /// Creates a copy of the current [Exercise]
-  /// object with optional modifications.
+  /// Creates a copy of the current [Exercise] object with optional modifications.
   Exercise copyWith({String? name, bool? completed}) {
     return Exercise(
       name: name ?? this.name,

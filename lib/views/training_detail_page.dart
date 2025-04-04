@@ -191,6 +191,7 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
     return Scaffold(
       backgroundColor: BrandColors.backgroundColor,
       appBar: AppBar(
+        backgroundColor: BrandColors.backgroundColor,
         title: const Text('Training Detail'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

@@ -1,3 +1,4 @@
+import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -65,6 +66,7 @@ class TrainingsList extends StatelessWidget {
             final formattedDate =
                 DateFormat('MMM d, yyyy').format(training.date);
             return Card(
+              color: BrandColors.cardColor,
               elevation: 2,
               margin: const EdgeInsets.symmetric(vertical: 4),
               child: ListTile(

@@ -15,10 +15,15 @@ class AuthStorage {
     return token;
   }
 
-  /// Saves the JWT token to secure storage.
+  /// Stores the JWT token in secure storage.
   static Future<String> getUserId() async {
     final token = await getToken();
     final decodedToken = JwtDecoder.decode(token);
     return decodedToken['sub'] as String;
+  }
+
+  /// Stores the JWT token in secure storage.
+  static Map<String, dynamic> decodeToken(String token) {
+    return JwtDecoder.decode(token);
   }
 }

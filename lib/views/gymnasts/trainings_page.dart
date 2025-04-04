@@ -1,3 +1,4 @@
+// File: lib/views/gymnasts/trainings_page.dart
 import 'package:fe_tucknpike/components/trainings_list.dart';
 import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/models/trainings.dart';
@@ -201,7 +202,7 @@ class TrainingsPageState extends State<TrainingsPage> {
     final monthStr = DateFormat('MMMM yyyy').format(_displayedMonth);
     return Scaffold(
       backgroundColor: BrandColors.backgroundColor,
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -248,6 +249,14 @@ class TrainingsPageState extends State<TrainingsPage> {
             TrainingsList(trainings: _trainings),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: BrandColors.accentColor,
+        onPressed: () {
+          context.push('/create-training');
+        },
+        tooltip: 'Create Training',
+        child: const Icon(Icons.add),
       ),
     );
   }

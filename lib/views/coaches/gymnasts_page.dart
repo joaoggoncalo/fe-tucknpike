@@ -1,7 +1,7 @@
-// File: lib/views/coaches/gymnasts_page.dart
 import 'package:fe_tucknpike/constants/brand_colors.dart';
 import 'package:fe_tucknpike/services/coach_service.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// A page that displays a list of gymnasts connected to the coach
 class GymnastsPage extends StatefulWidget {
@@ -242,6 +242,15 @@ class _GymnastsPageState extends State<GymnastsPage> {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: BrandColors.accentColor,
+        onPressed: () {
+          // Navigate to the create training page.
+          context.push('/create-training');
+        },
+        tooltip: 'Create Training',
+        child: const Icon(Icons.add),
       ),
     );
   }

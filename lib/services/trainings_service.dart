@@ -60,4 +60,31 @@ class TrainingService {
       throw Exception('Error updating location: ${response.body}');
     }
   }
+
+  /// Creates a new training session.
+  /// Sends a POST request with the training details.
+  Future<void> createTraining({
+    required String userId,
+    required List<String> exercises,
+    required DateTime date,
+    String? coachId,
+  }) async {
+    final body = {
+      'userId': userId,
+      if (coachId != null) 'coachId': coachId,
+      'exercises': exercises,
+      'date': DateTime(date.year, date.month, date.day, 14).toIso8601String(),
+      'location': <String, dynamic>{},
+    };
+
+    final response = await _apiClient.request(
+      endpoint: 'trainings',
+      method: 'POST',
+      body: body,
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Error creating training: ${response.body}');
+    }
+  }
 }
