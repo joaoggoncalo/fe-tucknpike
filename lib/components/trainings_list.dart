@@ -30,7 +30,19 @@ class TrainingsList extends StatelessWidget {
         : scheduledTrainings;
 
     if (displayedTrainings.isEmpty) {
-      return const SizedBox.shrink();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const Text('There are no scheduled trainings.'),
+        ],
+      );
     }
 
     return Column(

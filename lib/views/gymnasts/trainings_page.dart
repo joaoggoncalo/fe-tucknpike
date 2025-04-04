@@ -5,6 +5,7 @@ import 'package:fe_tucknpike/services/gymnast_service.dart';
 import 'package:fe_tucknpike/stores/auth_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 /// This widget displays a calendar view of trainings for the current month.
@@ -121,28 +122,76 @@ class TrainingsPageState extends State<TrainingsPage> {
         );
       }
 
-      return Container(
-        margin: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: borderColor,
-            width: borderWidth,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '$day',
-              style: const TextStyle(color: BrandColors.darkAccent),
+      return GestureDetector(
+        onTap: () => _handleDayTap(day),
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: borderColor,
+              width: borderWidth,
             ),
-            const SizedBox(height: 4),
-            buildStatusCircles(),
-          ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '$day',
+                style: const TextStyle(color: BrandColors.darkAccent),
+              ),
+              const SizedBox(height: 4),
+              buildStatusCircles(),
+            ],
+          ),
         ),
       );
     });
+  }
+
+  void _handleDayTap(int day) {
+    final matchedTrainings = _trainings.where((training) {
+      return training.date.year == _displayedMonth.year &&
+          training.date.month == _displayedMonth.month &&
+          training.date.day == day;
+    }).toList();
+
+    if (matchedTrainings.isEmpty) return;
+
+    if (matchedTrainings.length == 1) {
+      final training = matchedTrainings.first;
+      context.go('/trainings/${training.trainingId}', extra: training);
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Select a training'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: matchedTrainings.length,
+                itemBuilder: (context, index) {
+                  final training = matchedTrainings[index];
+                  final formattedDate =
+                      DateFormat('MMM d, yyyy').format(training.date);
+                  return ListTile(
+                    title: Text('Training on $formattedDate'),
+                    subtitle: Text('Status: ${training.status}'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.go('/trainings/${training.trainingId}',
+                          extra: training);
+                    },
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override

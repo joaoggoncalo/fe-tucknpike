@@ -43,4 +43,16 @@ class TrainingService {
       throw Exception('Error updating training status: ${response.body}');
     }
   }
+
+  Future<void> updateTrainingLocation(
+      String trainingId, Map<String, dynamic> location) async {
+    final response = await _apiClient.request(
+      endpoint: 'trainings/$trainingId/location',
+      method: 'PUT',
+      body: {'location': location},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error updating location: ${response.body}');
+    }
+  }
 }
