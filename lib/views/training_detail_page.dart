@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:fe_tucknpike/models/exercise.dart';
 import 'package:fe_tucknpike/services/trainings_service.dart';
+import 'package:fe_tucknpike/constants/brand_colors.dart';
 
 class TrainingDetailPage extends StatefulWidget {
   final Training training;
@@ -114,20 +115,15 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
           'Location permissions are permanently denied, cannot request permissions.');
     }
 
-    return await Geolocator.getCurrentPosition(
+    return Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
   }
 
   Future<void> _updateLocation() async {
     try {
-      // Get current position and request permission if needed.
       final position = await _determinePosition();
-
-      // Perform reverse geocoding to get the address from coordinates.
-
       final address = await GeocodingService()
           .getAddress(position.latitude, position.longitude);
-
       final location = {
         'latitude': position.latitude,
         'longitude': position.longitude,
@@ -139,7 +135,6 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Location updated successfully')));
     } catch (e) {
-      print('error: $e');
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error updating location: $e')));
     }
@@ -155,6 +150,7 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
     final isScheduled = widget.training.status.toLowerCase() == 'scheduled';
 
     return Scaffold(
+      backgroundColor: BrandColors.backgroundColor,
       appBar: AppBar(
         title: const Text('Training Detail'),
         leading: IconButton(
@@ -170,53 +166,93 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Training ID: ${widget.training.trainingId}',
-                  style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 8),
-              Text('User ID: ${widget.training.userId}',
-                  style: const TextStyle(fontSize: 18)),
-              if (widget.training.coachId != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text('Coach ID: ${widget.training.coachId}',
-                      style: const TextStyle(fontSize: 18)),
+              // Training summary card
+              Card(
+                color: BrandColors.cardColor,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text('Date: $formattedDate',
-                    style: const TextStyle(fontSize: 18)),
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Training ID: ${widget.training.trainingId}',
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: BrandColors.primaryColor)),
+                      const SizedBox(height: 8),
+                      Text('User ID: ${widget.training.userId}',
+                          style: const TextStyle(fontSize: 16)),
+                      if (widget.training.coachId != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text('Coach ID: ${widget.training.coachId}',
+                              style: const TextStyle(fontSize: 16)),
+                        ),
+                      const SizedBox(height: 8),
+                      Text('Date: $formattedDate',
+                          style: const TextStyle(fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Text('Status: ${widget.training.status}',
+                          style: const TextStyle(fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Text(
+                          'Location: ${widget.training.location['address'] ?? 'N/A'}',
+                          style: const TextStyle(fontSize: 16)),
+                      if (widget.training.gymnastUsername != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                              'Gymnast: ${widget.training.gymnastUsername}',
+                              style: const TextStyle(fontSize: 16)),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-              Text('Status: ${widget.training.status}',
-                  style: const TextStyle(fontSize: 18)),
-              Text('Location: ${widget.training.location['address'] ?? 'N/A'}',
-                  style: const TextStyle(fontSize: 18)),
-              if (widget.training.gymnastUsername != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text('Gymnast: ${widget.training.gymnastUsername}',
-                      style: const TextStyle(fontSize: 18)),
-                ),
-              const SizedBox(height: 16),
-              const Text('Exercises:',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              // Exercises section
+              Text('Exercises:',
+                  style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: BrandColors.primaryColor)),
               const SizedBox(height: 8),
-              ..._exercises.asMap().entries.map((entry) {
-                final index = entry.key;
-                final exercise = entry.value;
-                return CheckboxListTile(
-                  title: Text(exercise.name),
-                  value: exercise.completed,
-                  onChanged: isScheduled ? (_) => _toggleExercise(index) : null,
-                );
-              }).toList(),
+              Card(
+                color: BrandColors.cardColor,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: _exercises.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final exercise = entry.value;
+                      return CheckboxListTile(
+                        title: Text(exercise.name),
+                        value: exercise.completed,
+                        activeColor: BrandColors.accentColor,
+                        onChanged:
+                            isScheduled ? (_) => _toggleExercise(index) : null,
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              // New exercise input
               if (isScheduled) ...[
-                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -232,25 +268,56 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: _submitNewExercise,
-                      child: const Text('Add'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: BrandColors.accentColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Add',
+                          style: TextStyle(color: BrandColors.lightAccent)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
+                // Complete or missed training button
                 ElevatedButton(
                   onPressed: () async {
                     final status =
                         _hasCompletedExercise ? 'completed' : 'missed';
                     await _updateTrainingStatus(status);
                   },
-                  child: Text(_hasCompletedExercise
-                      ? 'Complete Training'
-                      : 'Missed Training'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BrandColors.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  child: Text(
+                    _hasCompletedExercise
+                        ? 'Complete Training'
+                        : 'Missed Training',
+                    style: const TextStyle(
+                        fontSize: 16, color: BrandColors.lightAccent),
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
+                // Update location button
                 ElevatedButton(
                   onPressed: _updateLocation,
-                  child: const Text('Update Location'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BrandColors.accentColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  child: const Text(
+                    'Update Location',
+                    style:
+                        TextStyle(fontSize: 16, color: BrandColors.lightAccent),
+                  ),
                 ),
               ],
             ],
