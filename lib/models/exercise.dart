@@ -11,6 +11,15 @@ class Exercise {
     );
   }
 
+  /// Creates a copy of the current [Exercise]
+  /// object with optional modifications.
+  Exercise copyWith({String? name, bool? completed}) {
+    return Exercise(
+      name: name ?? this.name,
+      completed: completed ?? this.completed,
+    );
+  }
+
   /// The name of the exercise.
   final String name;
 

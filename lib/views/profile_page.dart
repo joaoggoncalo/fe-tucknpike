@@ -6,6 +6,7 @@ import 'package:fe_tucknpike/services/coach_service.dart';
 import 'package:fe_tucknpike/services/gymnast_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// A page that displays the user's profile
 /// information and training statistics.
@@ -162,6 +163,8 @@ class ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 12),
                     Column(
                       children: _trainings.take(10).map((training) {
+                        final formattedDate =
+                            '${training.date.month}/${training.date.day}/${training.date.year}';
                         return Card(
                           color: BrandColors.cardColor,
                           elevation: 3,
@@ -178,7 +181,7 @@ class ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                             title: Text(
-                              'Training on ${training.date.month}/${training.date.day}/${training.date.year}',
+                              'Training on $formattedDate',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: BrandColors.primaryColor,
@@ -196,8 +199,7 @@ class ProfilePageState extends State<ProfilePage> {
                                         ),
                                       ),
                                       Text(
-                                        'Gymnast: '
-                                        '${training.gymnastUsername ?? "Unknown"}',
+                                        'Gymnast: ${training.gymnastUsername ?? "Unknown"}',
                                         style: const TextStyle(
                                           color: BrandColors.darkAccent,
                                         ),
@@ -210,6 +212,12 @@ class ProfilePageState extends State<ProfilePage> {
                                       color: BrandColors.darkAccent,
                                     ),
                                   ),
+                            onTap: () {
+                              context.go(
+                                '/trainings/${training.trainingId}?from=profile',
+                                extra: training,
+                              );
+                            },
                           ),
                         );
                       }).toList(),

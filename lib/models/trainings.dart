@@ -59,7 +59,7 @@ class Training {
   final Map<String, dynamic> location;
 
   /// The status of the training session.
-  final String status;
+  late final String status;
 
   /// Optional gymnast username when provided by the coach endpoint.
   final String? gymnastUsername;

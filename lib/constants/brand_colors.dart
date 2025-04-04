@@ -22,4 +22,7 @@ class BrandColors {
 
   /// Error color.
   static const errorColor = Color(0xFFEF233C);
+
+  /// White
+  static const white = Color(0xFFFFFFFF);
 }
