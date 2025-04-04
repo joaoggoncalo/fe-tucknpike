@@ -7,7 +7,9 @@ class TrainingService {
   /// Updates the completed status of each exercise.
   /// Endpoint: PUT /trainings/{trainingId}/exercises/status
   Future<void> updateExerciseStatus(
-      String trainingId, List<Map<String, dynamic>> exercises) async {
+    String trainingId,
+    List<Map<String, dynamic>> exercises,
+  ) async {
     final response = await _apiClient.request(
       endpoint: 'trainings/$trainingId/exercises/status',
       method: 'PUT',
@@ -44,8 +46,11 @@ class TrainingService {
     }
   }
 
+  /// Updates the training location.
   Future<void> updateTrainingLocation(
-      String trainingId, Map<String, dynamic> location) async {
+    String trainingId,
+    Map<String, dynamic> location,
+  ) async {
     final response = await _apiClient.request(
       endpoint: 'trainings/$trainingId/location',
       method: 'PUT',

@@ -9,6 +9,7 @@ import 'package:fe_tucknpike/views/role_based_shell.dart';
 import 'package:fe_tucknpike/views/training_detail_page.dart';
 import 'package:go_router/go_router.dart';
 
+/// A [GoRouter] instance that manages the app's routing.
 final GoRouter router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {

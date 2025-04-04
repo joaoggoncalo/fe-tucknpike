@@ -3,20 +3,20 @@ class Exercise {
   /// Creates an [Exercise] object.
   Exercise({required this.name, required this.completed});
 
+  /// Creates an [Exercise] object from a JSON map.
+  factory Exercise.fromJson(Map<String, dynamic> json) {
+    return Exercise(
+      name: json['name'] as String,
+      completed: json['completed'] as bool,
+    );
+  }
+
   /// Creates a copy of the current [Exercise]
   /// object with optional modifications.
   Exercise copyWith({String? name, bool? completed}) {
     return Exercise(
       name: name ?? this.name,
       completed: completed ?? this.completed,
-    );
-  }
-
-  /// Creates an [Exercise] object from a JSON map.
-  factory Exercise.fromJson(Map<String, dynamic> json) {
-    return Exercise(
-      name: json['name'] as String,
-      completed: json['completed'] as bool,
     );
   }
 

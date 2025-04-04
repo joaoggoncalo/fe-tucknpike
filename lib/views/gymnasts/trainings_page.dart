@@ -162,9 +162,9 @@ class TrainingsPageState extends State<TrainingsPage> {
       final training = matchedTrainings.first;
       context.go('/trainings/${training.trainingId}', extra: training);
     } else {
-      showDialog(
+      showDialog<AlertDialog>(
         context: context,
-        builder: (context) {
+        builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Select a training'),
             content: SizedBox(
@@ -181,8 +181,10 @@ class TrainingsPageState extends State<TrainingsPage> {
                     subtitle: Text('Status: ${training.status}'),
                     onTap: () {
                       Navigator.of(context).pop();
-                      context.go('/trainings/${training.trainingId}',
-                          extra: training);
+                      context.go(
+                        '/trainings/${training.trainingId}',
+                        extra: training,
+                      );
                     },
                   );
                 },

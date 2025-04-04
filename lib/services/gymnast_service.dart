@@ -10,13 +10,10 @@ class GymnastService {
   /// Calls the "my-trainings" endpoint and
   /// returns all trainings for the current user.
   Future<List<Training>> getTrainings() async {
-    print('get trainings');
     final response = await _apiClient.request(
       endpoint: 'trainings/my-trainings',
       method: 'GET',
     );
-    print('response: ${response.body}');
-    print('status code: ${response.statusCode}');
 
     if (response.statusCode == 200) {
       final jsonList = jsonDecode(response.body) as List<dynamic>;

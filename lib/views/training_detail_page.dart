@@ -1,37 +1,44 @@
-// dart
+import 'package:fe_tucknpike/constants/brand_colors.dart';
+import 'package:fe_tucknpike/models/exercise.dart';
+import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:fe_tucknpike/services/geocoding_service.dart';
+import 'package:fe_tucknpike/services/trainings_service.dart';
+import 'package:fe_tucknpike/stores/auth_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fe_tucknpike/models/trainings.dart';
-import 'package:fe_tucknpike/models/exercise.dart';
-import 'package:fe_tucknpike/services/trainings_service.dart';
-import 'package:fe_tucknpike/constants/brand_colors.dart';
+import 'package:intl/intl.dart';
 
+/// TrainingDetailPage displays the details of a specific training session.
 class TrainingDetailPage extends StatefulWidget {
+  /// Creates a TrainingDetailPage.
+  const TrainingDetailPage({
+    required this.training,
+    super.key,
+    this.fromProfile = false,
+  });
+
+  /// training is the training object to be displayed.
   final Training training;
+
+  /// fromProfile indicates if the page is accessed from the profile (owner).
   final bool fromProfile;
 
-  const TrainingDetailPage({
-    Key? key,
-    required this.training,
-    this.fromProfile = false,
-  }) : super(key: key);
-
   @override
-  _TrainingDetailPageState createState() => _TrainingDetailPageState();
+  State<TrainingDetailPage> createState() => _TrainingDetailPageState();
 }
 
 class _TrainingDetailPageState extends State<TrainingDetailPage> {
   late List<Exercise> _exercises;
   final TrainingService _trainingService = TrainingService();
   final TextEditingController _newExerciseController = TextEditingController();
+  bool _canEdit = false;
+  bool _isUpdatingLocation = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeCanEdit();
     _exercises = List<Exercise>.from(widget.training.exercises);
   }
 
@@ -39,6 +46,13 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
   void dispose() {
     _newExerciseController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeCanEdit() async {
+    final userId = await AuthStorage.getUserId();
+    setState(() {
+      _canEdit = widget.training.userId == userId;
+    });
   }
 
   Future<void> _toggleExercise(int index) async {
@@ -52,10 +66,11 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
           .map((e) => {'name': e.name, 'completed': e.completed})
           .toList();
       await _trainingService.updateExerciseStatus(
-          widget.training.trainingId, exercisesData);
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Exercise status updated')));
-    } catch (e) {
+        widget.training.trainingId,
+        exercisesData,
+      );
+    } on Exception catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error updating exercise: $e')));
     }
@@ -71,9 +86,10 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
         _exercises.add(Exercise(name: newName, completed: false));
         _newExerciseController.clear();
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('New exercise added')));
-    } catch (e) {
+    } on Exception catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error adding exercise: $e')));
     }
@@ -82,13 +98,17 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
   Future<void> _updateTrainingStatus(String status) async {
     try {
       await _trainingService.updateTrainingStatus(
-          widget.training.trainingId, status);
+        widget.training.trainingId,
+        status,
+      );
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Training marked as $status')));
       context.go('/trainings');
-    } catch (e) {
+    } on Exception catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating training status: $e')));
+        SnackBar(content: Text('Error updating training status: $e')),
+      );
     }
   }
 
@@ -112,14 +132,22 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
     }
     if (permission == LocationPermission.deniedForever) {
       throw Exception(
-          'Location permissions are permanently denied, cannot request permissions.');
+        'Location permissions are permanently denied, cannot request permissions.',
+      );
     }
 
+    ///
     return Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      /// Ignoring the deprecation warning for now.
+      // ignore: deprecated_member_use
+      desiredAccuracy: LocationAccuracy.high,
+    );
   }
 
   Future<void> _updateLocation() async {
+    setState(() {
+      _isUpdatingLocation = true;
+    });
     try {
       final position = await _determinePosition();
       final address = await GeocodingService()
@@ -131,12 +159,22 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
       };
 
       await _trainingService.updateTrainingLocation(
-          widget.training.trainingId, location);
+        widget.training.trainingId,
+        location,
+      );
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location updated successfully')));
-    } catch (e) {
+        const SnackBar(
+          content: Text('Location updated successfully'),
+        ),
+      );
+    } on Exception catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error updating location: $e')));
+    } finally {
+      setState(() {
+        _isUpdatingLocation = false;
+      });
     }
   }
 
@@ -148,6 +186,7 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
     final formattedDate =
         DateFormat('MMM d, yyyy').format(widget.training.date);
     final isScheduled = widget.training.status.toLowerCase() == 'scheduled';
+    final canEdit = _canEdit;
 
     return Scaffold(
       backgroundColor: BrandColors.backgroundColor,
@@ -185,47 +224,63 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Training ID: ${widget.training.trainingId}',
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: BrandColors.primaryColor)),
+                      Text(
+                        'Training ID: ${widget.training.trainingId}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: BrandColors.primaryColor,
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      Text('User ID: ${widget.training.userId}',
-                          style: const TextStyle(fontSize: 16)),
+                      Text(
+                        'User ID: ${widget.training.userId}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                       if (widget.training.coachId != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
-                          child: Text('Coach ID: ${widget.training.coachId}',
-                              style: const TextStyle(fontSize: 16)),
+                          child: Text(
+                            'Coach ID: ${widget.training.coachId}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
                         ),
                       const SizedBox(height: 8),
-                      Text('Date: $formattedDate',
-                          style: const TextStyle(fontSize: 16)),
-                      const SizedBox(height: 8),
-                      Text('Status: ${widget.training.status}',
-                          style: const TextStyle(fontSize: 16)),
+                      Text(
+                        'Date: $formattedDate',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                       const SizedBox(height: 8),
                       Text(
-                          'Location: ${widget.training.location['address'] ?? 'N/A'}',
-                          style: const TextStyle(fontSize: 16)),
+                        'Status: ${widget.training.status}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Location: ${widget.training.location['address'] ?? 'N/A'}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                       if (widget.training.gymnastUsername != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                              'Gymnast: ${widget.training.gymnastUsername}',
-                              style: const TextStyle(fontSize: 16)),
+                            'Gymnast: ${widget.training.gymnastUsername}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
                         ),
                     ],
                   ),
                 ),
               ),
               // Exercises section
-              Text('Exercises:',
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: BrandColors.primaryColor)),
+              const Text(
+                'Exercises:',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: BrandColors.primaryColor,
+                ),
+              ),
               const SizedBox(height: 8),
               Card(
                 color: BrandColors.cardColor,
@@ -244,15 +299,16 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
                         title: Text(exercise.name),
                         value: exercise.completed,
                         activeColor: BrandColors.accentColor,
-                        onChanged:
-                            isScheduled ? (_) => _toggleExercise(index) : null,
+                        onChanged: canEdit && isScheduled
+                            ? (_) => _toggleExercise(index)
+                            : null,
                       );
                     }).toList(),
                   ),
                 ),
               ),
-              // New exercise input
-              if (isScheduled) ...[
+              // New exercise input and editing controls (only displayed if editing is allowed)
+              if (isScheduled && canEdit) ...[
                 Row(
                   children: [
                     Expanded(
@@ -274,8 +330,10 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text('Add',
-                          style: TextStyle(color: BrandColors.lightAccent)),
+                      child: const Text(
+                        'Add',
+                        style: TextStyle(color: BrandColors.lightAccent),
+                      ),
                     ),
                   ],
                 ),
@@ -299,7 +357,9 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
                         ? 'Complete Training'
                         : 'Missed Training',
                     style: const TextStyle(
-                        fontSize: 16, color: BrandColors.lightAccent),
+                      fontSize: 16,
+                      color: BrandColors.lightAccent,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -313,11 +373,19 @@ class _TrainingDetailPageState extends State<TrainingDetailPage> {
                     ),
                     minimumSize: const Size.fromHeight(48),
                   ),
-                  child: const Text(
-                    'Update Location',
-                    style:
-                        TextStyle(fontSize: 16, color: BrandColors.lightAccent),
-                  ),
+                  child: _isUpdatingLocation
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            BrandColors.lightAccent,
+                          ),
+                        )
+                      : const Text(
+                          'Update Location',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: BrandColors.lightAccent,
+                          ),
+                        ),
                 ),
               ],
             ],

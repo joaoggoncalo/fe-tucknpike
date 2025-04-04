@@ -38,7 +38,6 @@ class _RoleBasedShellState extends State<RoleBasedShell> {
   }
 
   String? _decodeRole(String jwt) {
-    print('jwt $jwt');
     try {
       final parts = jwt.split('.');
       if (parts.length != 3) return null;
