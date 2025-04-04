@@ -1,3 +1,4 @@
+import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:fe_tucknpike/services/auth_service.dart';
 import 'package:fe_tucknpike/views/coaches/gymnasts_page.dart';
 import 'package:fe_tucknpike/views/gymnasts/trainings_page.dart';
@@ -5,10 +6,9 @@ import 'package:fe_tucknpike/views/login_page.dart';
 import 'package:fe_tucknpike/views/profile_page.dart';
 import 'package:fe_tucknpike/views/registration_page.dart';
 import 'package:fe_tucknpike/views/role_based_shell.dart';
+import 'package:fe_tucknpike/views/training_detail_page.dart';
 import 'package:go_router/go_router.dart';
 
-/// This file contains the routing logic for the application
-/// using the GoRouter package.
 final GoRouter router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
@@ -24,7 +24,6 @@ final GoRouter router = GoRouter(
       }
     }
 
-    // If not logged in and not heading toward login/register, force login.
     if (!loggedIn && !loggingIn) return '/login';
 
     return null;
@@ -48,6 +47,17 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/trainings',
           builder: (context, state) => const TrainingsPage(),
+        ),
+        GoRoute(
+          path: '/trainings/:trainingId',
+          builder: (context, state) {
+            final training = state.extra! as Training;
+            final fromProfile = state.uri.queryParameters['from'] == 'profile';
+            return TrainingDetailPage(
+              training: training,
+              fromProfile: fromProfile,
+            );
+          },
         ),
         GoRoute(
           path: '/profile',

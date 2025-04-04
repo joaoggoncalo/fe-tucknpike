@@ -1,5 +1,6 @@
 import 'package:fe_tucknpike/models/trainings.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 /// This widget displays a list of trainings.
@@ -61,6 +62,12 @@ class TrainingsList extends StatelessWidget {
                 ),
                 title: Text('Training on $formattedDate'),
                 subtitle: Text('Status: ${training.status}'),
+                onTap: () {
+                  context.go(
+                    '/trainings/${training.trainingId}',
+                    extra: training,
+                  );
+                },
               ),
             );
           },
