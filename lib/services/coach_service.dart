@@ -55,6 +55,18 @@ class CoachService {
     }
   }
 
+  /// Update the season goal for a gymnast.
+  Future<void> updateSeasonGoal(String gymnastUserId, String seasonGoal) async {
+    final response = await _apiClient.request(
+      endpoint: 'gymnasts/$gymnastUserId/season-goals',
+      method: 'PUT',
+      body: {'seasonGoals': seasonGoal},
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to update season goal ${response.body}');
+    }
+  }
+
   /// Remove a gymnast from the coach.
   Future<List<Training>> getAthletesTrainings() async {
     final response = await _apiClient.request(

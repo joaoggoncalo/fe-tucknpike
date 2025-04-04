@@ -25,4 +25,18 @@ class GymnastService {
       return [];
     }
   }
+
+  /// Fetches the season goal for the current user.
+  Future<String> getSeasonGoal() async {
+    final response = await _apiClient.request(
+      endpoint: 'gymnasts/my-season-goal',
+      method: 'GET',
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return data['seasonGoals'] as String;
+    } else {
+      throw Exception('Failed to load season goal: ${response.body}');
+    }
+  }
 }
