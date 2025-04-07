@@ -66,8 +66,11 @@ class _SelectGymnastPageState extends State<SelectGymnastPage> {
                 ),
                 elevation: 4,
                 child: ListTile(
-                  leading: const Icon(Icons.person,
-                      color: BrandColors.accentColor, size: 32),
+                  leading: const Icon(
+                    Icons.person,
+                    color: BrandColors.accentColor,
+                    size: 32,
+                  ),
                   title: Text(
                     gymnast['username'].toString(),
                     style: const TextStyle(
