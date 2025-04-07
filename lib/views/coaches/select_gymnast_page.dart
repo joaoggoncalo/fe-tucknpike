@@ -22,9 +22,16 @@ class _SelectGymnastPageState extends State<SelectGymnastPage> {
     _gymnastsFuture = _loadGymnasts();
   }
 
+  // dart
   Future<List<Map<String, dynamic>>> _loadGymnasts() async {
-    final gymnastsList = await _coachService.getAllGymnasts();
-    return gymnastsList.cast<Map<String, dynamic>>();
+    final connectedIds =
+        (await _coachService.getGymnasts()).map((id) => id.toString()).toSet();
+    final allGymnasts = await _coachService.getAllGymnasts();
+    final filteredGymnasts = allGymnasts
+        .cast<Map<String, dynamic>>()
+        .where((gymnast) => connectedIds.contains(gymnast['userId'].toString()))
+        .toList();
+    return filteredGymnasts;
   }
 
   @override
@@ -52,12 +59,8 @@ class _SelectGymnastPageState extends State<SelectGymnastPage> {
             itemCount: gymnasts.length,
             itemBuilder: (context, index) {
               final gymnast = gymnasts[index];
-              // Reuse the same card widget layout as in gymnasts_page.
               return Card(
                 color: BrandColors.cardColor,
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -77,7 +80,6 @@ class _SelectGymnastPageState extends State<SelectGymnastPage> {
                   ),
                   subtitle: Text('ID: ${gymnast['userId']}'),
                   onTap: () {
-                    // Navigate to the create training page with the selected gymnast ID.
                     context.push('/create-training', extra: gymnast);
                   },
                 ),
